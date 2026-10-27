@@ -68,6 +68,9 @@ pre#prompt{margin:0;background:var(--code-bg);border-radius:4px;padding:16px;fon
 #status{font-size:14px;color:var(--muted);min-height:1.4em;margin:0}
 .after{background:var(--accent-soft);border-radius:6px;padding:26px 28px;display:flex;flex-direction:column;gap:14px}
 .after ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:10px}
+.last{border:2px solid var(--accent);border-radius:6px;padding:26px 28px;display:flex;flex-direction:column;gap:14px;background:var(--card)}
+.last p{margin:0;max-width:64ch}
+.last ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:10px}
 footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--rule);font-size:14px;color:var(--muted);max-width:760px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style>
@@ -204,6 +207,17 @@ footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--rule);font-si
           <li><b>Work the list.</b> Make each call on the "needs your eyes" list yourself.</li>
           <li><b>Verify the whole file.</b> Check it against WCAG yourself, not only the flagged items. Run your app's accessibility checker, and use a screen reader if you can. A checker finds the big things but can't judge quality: junk alt text still passes.</li>
           <li><b>Turn every miss into a rule.</b> If you catch something the AI missed, add a line to your guardrails so it's caught next time. Your prompt gets better each time you use it.</li>
+        </ol>
+      </section>
+
+      <section class="last" aria-labelledby="last-h">
+        <p class="eyebrow">Last step</p>
+        <h2 id="last-h">Make it yours. This is a starting point.</h2>
+        <p>The prompt you built here is a first draft, not a finished tool. It works best as the start of a conversation.</p>
+        <ol>
+          <li><b>Feed it to your AI, then talk it through.</b> Paste the prompt in, then tell the AI about your course, your students and the files you're working with. Ask what else it needs to know, and adjust the prompt together until it fits.</li>
+          <li><b>Align it with your people and your policies.</b> Check it against what your faculty and their courses actually need, your institution's AI and accessibility policies, and any guardrails your college already has in place.</li>
+          <li><b>Always double-check what the AI gives you.</b> Every file, every time. AI can be confidently wrong, and the final call belongs to you.</li>
         </ol>
       </section>
     </main>
