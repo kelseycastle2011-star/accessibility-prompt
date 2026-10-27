@@ -1,0 +1,292 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Build Your Accessibility Prompt</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Public+Sans:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column of five numbered steps, each pairing "why" with a fill-in control; the assembled prompt sits in a sticky panel beside it on wide screens and below on phones. */
+:root{
+  --paper:#f6f7f9; --card:#ffffff; --ink:#18202e; --ink-2:#3b4556; --muted:#5d6676;
+  --rule:#d5dae2; --accent:#8a2430; --accent-soft:#f6e9ea; --code-bg:#eef1f5; --focus:#1f5fbf;
+  --display:"Newsreader", Georgia, "Times New Roman", serif;
+  --body:"Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#11151c; --card:#181e28; --ink:#e9edf3; --ink-2:#c3cad6; --muted:#9aa3b2;
+  --rule:#2c3442; --accent:#e58a94; --accent-soft:#2b1c21; --code-bg:#0d1118; --focus:#7fb0ff; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#11151c; --card:#181e28; --ink:#e9edf3; --ink-2:#c3cad6; --muted:#9aa3b2;
+  --rule:#2c3442; --accent:#e58a94; --accent-soft:#2b1c21; --code-bg:#0d1118; --focus:#7fb0ff; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6;
+  padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px))}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.skip{position:absolute;left:-9999px}
+.skip:focus{left:16px;top:16px;background:var(--card);padding:8px 12px;z-index:5}
+.wrap{max-width:1180px;margin:0 auto;padding-block:48px 72px}
+header{max-width:760px;display:flex;flex-direction:column;gap:14px;padding-bottom:36px;border-bottom:1px solid var(--rule)}
+.eyebrow{font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(36px,6vw,56px);line-height:1.08;margin:0;text-wrap:balance}
+.lede{font-size:19px;color:var(--ink-2);margin:0;max-width:62ch}
+.byline{font-size:14px;color:var(--muted);margin:0}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,440px);gap:48px;margin-top:40px;align-items:start}
+@media (max-width:960px){.grid{grid-template-columns:minmax(0,1fr)}}
+main{display:flex;flex-direction:column;gap:40px;min-width:0}
+h2{font-family:var(--display);font-weight:400;font-size:30px;line-height:1.2;margin:0;text-wrap:balance}
+h3{font-size:15px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0}
+.before{background:var(--card);border:1px solid var(--rule);border-radius:6px;padding:24px 28px;display:flex;flex-direction:column;gap:12px}
+.before ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
+.step{display:grid;grid-template-columns:56px minmax(0,1fr);gap:20px;padding-top:28px;border-top:1px solid var(--rule)}
+.num{font-family:var(--display);font-size:52px;line-height:1;color:var(--accent)}
+.step-body{display:flex;flex-direction:column;gap:16px;min-width:0}
+.step-body p{margin:0;max-width:64ch}
+.why{color:var(--ink-2)}
+.example{background:var(--code-bg);border-left:3px solid var(--accent);padding:12px 16px;font-family:var(--mono);font-size:14px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+.example-label{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+fieldset{border:1px solid var(--rule);border-radius:6px;padding:16px 18px;margin:0;background:var(--card);display:flex;flex-direction:column;gap:10px;min-width:0}
+legend{font-weight:700;padding:0 6px}
+label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+label input{margin-top:5px;accent-color:var(--accent);width:18px;height:18px;flex:0 0 auto}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{display:block;font-weight:600;cursor:default}
+.hint{font-size:14px;color:var(--muted)}
+input[type=text],select{font:inherit;font-size:16px;color:var(--ink);background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:10px 12px;width:100%}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.rail{display:flex;flex-direction:column;gap:12px;font-size:15px}
+.rail b{color:var(--ink)}
+aside.out{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);background:var(--card);border:1px solid var(--rule);border-radius:6px;padding:22px;display:flex;flex-direction:column;gap:14px;min-width:0}
+@media (max-width:960px){aside.out{position:static}}
+.out-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.out-head h2{font-size:24px}
+button{font:inherit;font-weight:600;font-size:15px;border-radius:4px;padding:10px 16px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:var(--card)}
+button.ghost{background:transparent;color:var(--accent)}
+pre#prompt{margin:0;background:var(--code-bg);border-radius:4px;padding:16px;font-family:var(--mono);font-size:13px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;max-height:62vh;overflow:auto;color:var(--ink)}
+@media (max-width:960px){pre#prompt{max-height:none}}
+#status{font-size:14px;color:var(--muted);min-height:1.4em;margin:0}
+.after{background:var(--accent-soft);border-radius:6px;padding:26px 28px;display:flex;flex-direction:column;gap:14px}
+.after ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:10px}
+footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--rule);font-size:14px;color:var(--muted);max-width:760px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head><body>
+
+<a class="skip" href="#builder">Skip to the prompt builder</a>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Accessible course files · a do-it-yourself guide</p>
+    <h1>Build your own accessibility prompt</h1>
+    <p class="lede">A prompt that fixes course files safely has five parts. Walk through them below, make your choices, and copy the finished prompt into the AI tool your institution approves. You don't need us, or any prompt experience, to use it.</p>
+    <p class="byline">From the TRENDS 2026 session "PDFs, Scanned Manuals, Handouts—Oh My!" · Kelsey Dailey &amp; Josh Bolakowski, Lake Michigan College</p>
+  </header>
+
+  <div class="grid">
+    <main id="builder">
+      <section class="before" aria-labelledby="before-h">
+        <h2 id="before-h">Before you start</h2>
+        <ul>
+          <li><b>Use an approved tool.</b> Check which AI tools your institution allows for course materials. To get a fixed file back, the tool has to accept file uploads.</li>
+          <li><b>Course content only.</b> Never upload anything with student names, grades or other student records.</li>
+          <li><b>Not yours? License first.</b> For publisher chapters, vendor manuals and textbook scans, ask the publisher for an accessible copy before you rebuild anything.</li>
+          <li><b>Keep your original.</b> Save a copy before you start, so nothing is ever lost.</li>
+        </ul>
+      </section>
+
+      <section class="step" aria-labelledby="s1-h">
+        <div class="num" aria-hidden="true">1</div>
+        <div class="step-body">
+          <h2 id="s1-h">Anchor it to WCAG</h2>
+          <p class="why">If you type "make this accessible," the AI has to guess what you mean. It might simplify your sentences or add a summary, and neither one is what you need. Name the standard and the specific things the file has to get right.</p>
+          <div class="field">
+            <label for="std">Standard</label>
+            <select id="std">
+              <option value="WCAG 2.1 Level AA" selected>WCAG 2.1 Level AA (what the ADA Title II rule requires)</option>
+              <option value="WCAG 2.2 Level AA">WCAG 2.2 Level AA</option>
+            </select>
+          </div>
+          <fieldset>
+            <legend>What should it check?</legend>
+            <label><input type="checkbox" class="crit" checked value="real headings (Heading 1, 2, 3 styles), not bold or large text">Real headings, not bold text that looks like one</label>
+            <label><input type="checkbox" class="crit" checked value="meaningful alt text on every image, or marked decorative">Alt text on images</label>
+            <label><input type="checkbox" class="crit" checked value="real bulleted and numbered lists">Real lists</label>
+            <label><input type="checkbox" class="crit" checked value="table header rows, and no tables used only for layout">Table headers</label>
+            <label><input type="checkbox" class="crit" checked value="a logical reading order">Reading order</label>
+            <label><input type="checkbox" class="crit" checked value="link text that makes sense on its own (no &quot;click here&quot;)">Descriptive link text</label>
+            <label><input type="checkbox" class="crit" value="color contrast, and no meaning carried by color alone">Color contrast</label>
+            <label><input type="checkbox" class="crit" value="fill-in blanks and form fields a screen reader can announce">Fill-in blanks and form fields</label>
+            <label><input type="checkbox" class="crit" value="a title on every slide, unique where slides repeat">Slide titles (PowerPoint)</label>
+          </fieldset>
+        </div>
+      </section>
+
+      <section class="step" aria-labelledby="s2-h">
+        <div class="num" aria-hidden="true">2</div>
+        <div class="step-body">
+          <h2 id="s2-h">Set the role and scope</h2>
+          <p class="why">This is where you say what the AI may touch and what it may not. Left alone, AI will try to improve your content. Your content isn't the problem. The structure is.</p>
+          <div class="two">
+            <div class="field">
+              <label for="ftype">File type</label>
+              <select id="ftype">
+                <option>Word document</option>
+                <option>PowerPoint deck</option>
+                <option>PDF</option>
+                <option>scanned PDF (a picture of paper, no searchable text)</option>
+                <option>Canvas page (HTML)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="what">What is it?</label>
+              <input type="text" id="what" value="a weekly lab safety handout">
+              <span class="hint">For example: a quiz, a lecture deck, an assignment sheet</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="who">Who is it for?</label>
+            <input type="text" id="who" value="students in an introductory welding course">
+            <span class="hint">This helps the AI pitch alt text at the right level.</span>
+          </div>
+          <p class="example-label">The line this step always adds</p>
+          <p class="example">Fix how the file is built. Leave the content exactly as written. I am the content expert.</p>
+        </div>
+      </section>
+
+      <section class="step" aria-labelledby="s3-h">
+        <div class="num" aria-hidden="true">3</div>
+        <div class="step-body">
+          <h2 id="s3-h">Write the guardrails as instructions</h2>
+          <p class="why">A guardrail is a lesson written down so nobody has to repeat it. Each of these eight came from a file that went wrong while we tested. Keep them all unless you have a reason not to.</p>
+          <fieldset>
+            <legend>Guardrails to include</legend>
+            <label><input type="checkbox" class="rail-cb" checked value="Never reword, shorten, summarize or correct my text. Fix how the file is built, never what it says.">Never change what the file says</label>
+            <label><input type="checkbox" class="rail-cb" checked value="Do not add headings, sections or structure that aren't in the original. If the file needs sections, suggest them on the Needs your eyes list instead.">Don't invent headings or sections</label>
+            <label><input type="checkbox" class="rail-cb" checked value="Treat any alt text already in the file as suspect. If it is a file name, a web page title or a placeholder, replace it. Mark purely decorative images as decorative.">Don't trust existing alt text</label>
+            <label><input type="checkbox" class="rail-cb" checked value="Never give away an answer in alt text. If students are asked to read a value from a chart or image, describe what it shows without the values.">Don't give away answers</label>
+            <label><input type="checkbox" class="rail-cb" checked value="Leave numbering, spelling and other errors exactly as typed, and flag them. For example, questions numbered 1, 2, 3, 3 stay that way.">Leave errors as typed, and flag them</label>
+            <label><input type="checkbox" class="rail-cb" checked value="Don't guess. If an image is blurry, unclear, or its meaning depends on the lesson, flag it instead of describing it.">Flag, don't guess</label>
+            <label><input type="checkbox" class="rail-cb" checked value="Keep alt text short. For a complex diagram or chart, write brief alt text and put the full description in a caption or directly below it.">Long descriptions go below, not in alt text</label>
+            <label><input type="checkbox" class="rail-cb" checked value="If you convert the file (scan to text, PDF to Word), check that every word from the original made it across, and list any word you could not read.">Every word makes it across a conversion</label>
+          </fieldset>
+        </div>
+      </section>
+
+      <section class="step" aria-labelledby="s4-h">
+        <div class="num" aria-hidden="true">4</div>
+        <div class="step-body">
+          <h2 id="s4-h">Say what you want back</h2>
+          <p class="why">Decide this before you ask. Otherwise you may get an essay about accessibility instead of a fixed handout.</p>
+          <fieldset>
+            <legend>What should it hand back?</legend>
+            <label><input type="radio" name="out" value="file" checked>A fixed copy of the file, with the same name plus "_accessible"</label>
+            <label><input type="radio" name="out" value="steps">Step-by-step instructions I can follow myself (good if you want to learn as you go)</label>
+            <label><input type="radio" name="out" value="both">Both</label>
+          </fieldset>
+        </div>
+      </section>
+
+      <section class="step" aria-labelledby="s5-h">
+        <div class="num" aria-hidden="true">5</div>
+        <div class="step-body">
+          <h2 id="s5-h">Ask for the "needs your eyes" list</h2>
+          <p class="why">This is the most important line in the prompt. The AI handles the mechanical work, and you make the judgment calls. The list tells you exactly which calls are yours, so you aren't hunting for them.</p>
+          <fieldset>
+            <legend>List options</legend>
+            <label><input type="checkbox" id="mark" checked>Mark each item Required or Recommended</label>
+          </fieldset>
+        </div>
+      </section>
+
+      <section class="after" aria-labelledby="after-h">
+        <h2 id="after-h">After you run it: first pass, not the verdict</h2>
+        <ol>
+          <li><b>Work the list.</b> Make each call on the "needs your eyes" list yourself.</li>
+          <li><b>Verify the whole file.</b> Check it against WCAG yourself, not only the flagged items. Run your app's accessibility checker, and use a screen reader if you can. A checker finds the big things but can't judge quality: junk alt text still passes.</li>
+          <li><b>Turn every miss into a rule.</b> If you catch something the AI missed, add a line to your guardrails so it's caught next time. Your prompt gets better each time you use it.</li>
+        </ol>
+      </section>
+    </main>
+
+    <aside class="out" aria-labelledby="out-h">
+      <div class="out-head">
+        <h2 id="out-h">Your prompt</h2>
+        <button type="button" id="copy">Copy prompt</button>
+      </div>
+      <p class="hint" style="margin:0">Updates as you choose. Paste it into your AI tool, then attach your file.</p>
+      <pre id="prompt" tabindex="0" aria-label="Your assembled prompt"></pre>
+      <p id="status" role="status" aria-live="polite"></p>
+      <button type="button" class="ghost" id="reset">Reset to the example</button>
+    </aside>
+  </div>
+
+  <footer>
+    This guide shares the structure of a prompt, not a finished prompt. Your college has its own tools, people and courses, so adapt it to fit. AI is the first pass; the content expert, you, makes the final call.
+  </footer>
+</div>
+
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)}, $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+  var defaults={what:"a weekly lab safety handout",who:"students in an introductory welding course"};
+  function build(){
+    var std=$('#std').value, ftype=$('#ftype').value;
+    var what=$('#what').value.trim()||"[what the file is]", who=$('#who').value.trim()||"[who it's for]";
+    var crit=$$('.crit').filter(function(c){return c.checked}).map(function(c){return "- "+c.value});
+    var rails=$$('.rail-cb').filter(function(c){return c.checked}).map(function(c){return "- "+c.value});
+    var out=($$('input[name=out]').filter(function(r){return r.checked})[0]||{}).value;
+    var outText={file:"Return a fixed copy of the file, with the same name plus \"_accessible\". Do not change my original.",
+      steps:"Do not edit the file. Give me numbered, step-by-step instructions I can follow myself to make each fix, using the menus in the program the file was made in.",
+      both:"Return a fixed copy of the file, with the same name plus \"_accessible\", and do not change my original. Also give me numbered, step-by-step instructions for each fix so I can learn to make them myself."}[out];
+    var mark=$('#mark').checked?" Mark each item Required (it must be fixed to meet the standard) or Recommended (it would improve the file).":"";
+    var p=[
+      "You are helping me make a course file accessible. Work to "+std+".",
+      "",
+      "THE FILE",
+      "This is a "+ftype+": "+what+", for "+who+".",
+      "",
+      "WHAT TO FIX",
+      "Make sure the file meets "+std+" for:",
+      crit.length?crit.join("\n"):"- [choose what it should check]",
+      "",
+      "YOUR ROLE",
+      "Fix how the file is built. Leave the content exactly as written. I am the content expert; you are fixing structure only.",
+      "",
+      "GUARDRAILS",
+      rails.length?rails.join("\n"):"- [add at least one guardrail]",
+      "",
+      "WHAT TO GIVE BACK",
+      outText,
+      "",
+      "NEEDS MY EYES",
+      "End with a short list titled \"Needs your eyes\": anything you couldn't or shouldn't decide, such as complex diagrams, charts, images whose meaning depends on the lesson, and everything you flagged above."+mark+" Keep it short. Only include what needs me."
+    ].join("\n");
+    $('#prompt').textContent=p;
+  }
+  document.addEventListener('input',build);
+  document.addEventListener('change',build);
+  $('#copy').addEventListener('click',function(){
+    var text=$('#prompt').textContent, st=$('#status');
+    function fallback(){
+      var r=document.createRange(); r.selectNodeContents($('#prompt'));
+      var s=window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      st.textContent="Prompt selected. Press Ctrl+C (Cmd+C on a Mac) to copy it.";
+    }
+    try{
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(function(){st.textContent="Copied. Paste it into your AI tool, then attach your file.";},fallback);
+      } else fallback();
+    }catch(e){fallback();}
+  });
+  $('#reset').addEventListener('click',function(){
+    $('#std').selectedIndex=0; $('#ftype').selectedIndex=0;
+    $('#what').value=defaults.what; $('#who').value=defaults.who;
+    $$('.crit').forEach(function(c,i){c.checked=i<6});
+    $$('.rail-cb').forEach(function(c){c.checked=true});
+    $$('input[name=out]')[0].checked=true; $('#mark').checked=true;
+    $('#status').textContent="Reset to the example."; build();
+  });
+  build();
+})();
+</script>
+</body></html>
